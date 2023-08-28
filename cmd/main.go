@@ -40,7 +40,7 @@ func buildPhotoBlock() *tview.Image {
   photo, err := jpeg.Decode(bytes.NewReader(data))
   check(err)
 
-  return tview.NewImage().SetImage(photo) 
+  return tview.NewImage().SetImage(photo).SetColors(tview.TrueColor) 
 }
 
 func buildContactsBlock() *tview.List {
