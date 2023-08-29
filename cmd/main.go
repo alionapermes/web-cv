@@ -10,11 +10,6 @@ import (
 )
 
 const (
-  stateContacts = iota
-  stateExp
-  stateAbout
-  stateEdu
-
   status = "21 y.o. Golang developer"
   email  = "alionapermes@gmail.com"
   linkTg = "t.me/alionapermes"
@@ -98,7 +93,7 @@ func buildContactsBlock() (*tview.List, *tview.Box) {
   return contactsBlock, contactsBlock.Box
 }
 
-func navWrap[C uiComponent](build func () (*C, *tview.Box)) (*C) {
+func navWrap[C uiComponent](build func () (*C, *tview.Box)) *C {
   component, box := build()
 
   box.SetInputCapture(func(e *tcell.EventKey) *tcell.EventKey {
