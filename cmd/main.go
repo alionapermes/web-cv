@@ -24,46 +24,34 @@ const (
 Skills: PHP 7.4/8.2, MySQL, Git, JS (Vue3, JQuery)`
 )
 
-type uiComponent interface {
-  tview.TextView | tview.Image | tview.List
-}
-
 var app *tview.Application
 
 var navPos int
 var navMap map[int]*tview.Box
 
-func buildExpBlock() (*tview.TextView, *tview.Box) {
-  textView := tview.NewTextView().
+func buildTextBlock(title, text string) (tview.Primitive, *tview.Box) {
+  block := tview.NewTextView().
     SetDynamicColors(true).
     SetRegions(true).
-    SetText(expText)
+    SetText(text)
 
-  textView.SetTitle("Experience").SetBorder(true)
-  return textView, textView.Box
+  block.SetTitle(title).SetBorder(true)
+  return block, block.Box
 }
 
-func buildAboutBlock() (*tview.TextView, *tview.Box) {
-  textView := tview.NewTextView().
-    SetDynamicColors(true).
-    SetRegions(true).
-    SetText(aboutText)
-
-  textView.SetTitle("About me").SetBorder(true)
-  return textView, textView.Box
+func buildExpBlock() (tview.Primitive, *tview.Box) {
+  return buildTextBlock("Experience", expText)
 }
 
-func buildEduBlock() (*tview.TextView, *tview.Box) {
-  textView := tview.NewTextView().
-    SetDynamicColors(true).
-    SetRegions(true).
-    SetText(eduText)
-
-  textView.SetTitle("Education").SetBorder(true)
-  return textView, textView.Box
+func buildAboutBlock() (tview.Primitive, *tview.Box) {
+  return buildTextBlock("About me", aboutText)
 }
 
-func buildPhotoBlock() (*tview.Image, *tview.Box) {
+func buildEduBlock() (tview.Primitive, *tview.Box) {
+  return buildTextBlock("Education", eduText)
+}
+
+func buildPhotoBlock() *tview.Image {
   check := func(err error) {
     if err != nil {
       panic(err)
@@ -79,10 +67,10 @@ func buildPhotoBlock() (*tview.Image, *tview.Box) {
   img := tview.NewImage().
     SetImage(photo).
     SetColors(tview.TrueColor)
-  return img, img.Box
+  return img
 }
 
-func buildContactsBlock() (*tview.List, *tview.Box) {
+func buildContactsBlock() (tview.Primitive, *tview.Box) {
   contactsBlock := tview.NewList().
     ShowSecondaryText(true).
     AddItem("Email:", email, 'e', func() {}).
@@ -93,8 +81,8 @@ func buildContactsBlock() (*tview.List, *tview.Box) {
   return contactsBlock, contactsBlock.Box
 }
 
-func navWrap[C uiComponent](build func () (*C, *tview.Box)) *C {
-  component, box := build()
+func navWrap(build func () (tview.Primitive, *tview.Box)) (tview.Primitive, *tview.Box) {
+  primitive, box := build()
 
   box.SetInputCapture(func(e *tcell.EventKey) *tcell.EventKey {
     mapLen := len(navMap)
@@ -116,7 +104,7 @@ func navWrap[C uiComponent](build func () (*C, *tview.Box)) *C {
     box.SetBorderColor(tcell.ColorGreen)
   })
 
-  return component
+  return primitive, box
 }
 
 func main() {
@@ -125,16 +113,20 @@ func main() {
 
   app = tview.NewApplication()
 
-  contactsBlock := navWrap(buildContactsBlock)
-  photoBlock := navWrap(buildPhotoBlock)
-  aboutBlock := navWrap(buildAboutBlock)
-  eduBlock := navWrap(buildEduBlock)
-  expBlock := navWrap(buildExpBlock)
+  photoBlock := buildPhotoBlock()
 
-  navMap[len(navMap)] = contactsBlock.Box
-  navMap[len(navMap)] = expBlock.Box
-  navMap[len(navMap)] = aboutBlock.Box
-  navMap[len(navMap)] = eduBlock.Box
+  contactsBlock, box := navWrap(buildContactsBlock)
+  navMap[len(navMap)] = box
+
+  expBlock, box := navWrap(buildExpBlock)
+  navMap[len(navMap)] = box
+
+  aboutBlock, box := navWrap(buildAboutBlock)
+  navMap[len(navMap)] = box
+
+  eduBlock, box := navWrap(buildEduBlock)
+  navMap[len(navMap)] = box
+
 
   flex := tview.NewFlex().SetDirection(tview.FlexColumn).
     AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
