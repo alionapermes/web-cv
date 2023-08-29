@@ -29,37 +29,46 @@ const (
 Skills: PHP 7.4/8.2, MySQL, Git, JS (Vue3, JQuery)`
 )
 
-func buildExpBlock() *tview.TextView {
+type uiComponent interface {
+  tview.TextView | tview.Image | tview.List
+}
+
+var app *tview.Application
+
+var navPos int
+var navMap map[int]*tview.Box
+
+func buildExpBlock() (*tview.TextView, *tview.Box) {
   textView := tview.NewTextView().
     SetDynamicColors(true).
     SetRegions(true).
     SetText(expText)
 
   textView.SetTitle("Experience").SetBorder(true)
-  return textView
+  return textView, textView.Box
 }
 
-func buildAboutBlock() *tview.TextView {
+func buildAboutBlock() (*tview.TextView, *tview.Box) {
   textView := tview.NewTextView().
     SetDynamicColors(true).
     SetRegions(true).
     SetText(aboutText)
 
   textView.SetTitle("About me").SetBorder(true)
-  return textView
+  return textView, textView.Box
 }
 
-func buildEduBlock() *tview.TextView {
+func buildEduBlock() (*tview.TextView, *tview.Box) {
   textView := tview.NewTextView().
     SetDynamicColors(true).
     SetRegions(true).
     SetText(eduText)
 
   textView.SetTitle("Education").SetBorder(true)
-  return textView
+  return textView, textView.Box
 }
 
-func buildPhotoBlock() *tview.Image {
+func buildPhotoBlock() (*tview.Image, *tview.Box) {
   check := func(err error) {
     if err != nil {
       panic(err)
@@ -72,10 +81,13 @@ func buildPhotoBlock() *tview.Image {
   photo, err := jpeg.Decode(bytes.NewReader(data))
   check(err)
 
-  return tview.NewImage().SetImage(photo).SetColors(tview.TrueColor) 
+  img := tview.NewImage().
+    SetImage(photo).
+    SetColors(tview.TrueColor)
+  return img, img.Box
 }
 
-func buildContactsBlock() *tview.List {
+func buildContactsBlock() (*tview.List, *tview.Box) {
   contactsBlock := tview.NewList().
     ShowSecondaryText(true).
     AddItem("Email:", email, 'e', func() {}).
@@ -83,43 +95,51 @@ func buildContactsBlock() *tview.List {
     AddItem("GitHub:", linkGh, 'g', func() {})
 
   contactsBlock.SetTitle("Contacts").SetBorder(true)
-  return contactsBlock
+  return contactsBlock, contactsBlock.Box
+}
+
+func navWrap[C uiComponent](build func () (*C, *tview.Box)) (*C) {
+  component, box := build()
+
+  box.SetInputCapture(func(e *tcell.EventKey) *tcell.EventKey {
+    mapLen := len(navMap)
+
+    switch key := e.Key(); key {
+    case tcell.KeyTab: navPos = (navPos + 1) % mapLen
+    case tcell.KeyBacktab: navPos = (navPos + mapLen - 1) % mapLen
+    default: return e
+    }
+
+    app.SetFocus(navMap[navPos])
+    return nil
+  })
+
+  box.SetFocusFunc(func() {
+    for _, b := range navMap {
+      b.SetBorderColor(tcell.ColorWhite)
+    }
+    box.SetBorderColor(tcell.ColorGreen)
+  })
+
+  return component
 }
 
 func main() {
-  app := tview.NewApplication()
+  navPos = 0
+  navMap = make(map[int]*tview.Box)
 
-  contactsBlock := buildContactsBlock()
-  photoBlock := buildPhotoBlock()
-  aboutBlock := buildAboutBlock()
-  eduBlock := buildEduBlock()
-  expBlock := buildExpBlock()
+  app = tview.NewApplication()
 
-  focusMap := []*tview.Box{contactsBlock.Box, expBlock.Box, aboutBlock.Box, eduBlock.Box}
-  for i, box := range focusMap {
-    (func(index int) {
-      box.SetInputCapture(func(e *tcell.EventKey) *tcell.EventKey {
-        mapLen := len(focusMap)
+  contactsBlock := navWrap(buildContactsBlock)
+  photoBlock := navWrap(buildPhotoBlock)
+  aboutBlock := navWrap(buildAboutBlock)
+  eduBlock := navWrap(buildEduBlock)
+  expBlock := navWrap(buildExpBlock)
 
-        var focusPos int
-        switch key := e.Key(); key {
-        case tcell.KeyTab: focusPos = (index + 1) % mapLen
-        case tcell.KeyBacktab: focusPos = (index + mapLen - 1) % mapLen
-        default: return e
-        }
-        app.SetFocus(focusMap[focusPos])
-        return nil
-      })
-    })(i)
-
-    _box := box
-    _box.SetFocusFunc(func() {
-      for _, b := range focusMap {
-        b.SetBorderColor(tcell.ColorWhite)
-      }
-      _box.SetBorderColor(tcell.ColorGreen)
-    })
-  }
+  navMap[len(navMap)] = contactsBlock.Box
+  navMap[len(navMap)] = expBlock.Box
+  navMap[len(navMap)] = aboutBlock.Box
+  navMap[len(navMap)] = eduBlock.Box
 
   flex := tview.NewFlex().SetDirection(tview.FlexColumn).
     AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
