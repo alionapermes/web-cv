@@ -45,7 +45,7 @@ func (ui *UI) Start() error {
   return nil
 }
 
-func (ui *UI) navAdd(build func () Component) Component {
+func (ui *UI) navAdd(build func() Component) Component {
   component := build()
   ui.navMap[len(ui.navMap)] = component
 
