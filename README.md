@@ -10,5 +10,5 @@ make [bin|wasm] # wasm is default target
 
 ## Roadmap
 
-[ ] Wait for wasm support by [tcell](https://github.com/gdamore/tcell)
+- [ ] Wait for wasm support by [tcell](https://github.com/gdamore/tcell)
 
