@@ -1,0 +1,25 @@
+contacts:
+  telegram: t.me/alionapermes
+  email: alionapermes@gmail.com
+  github: github.com/alionapermes
+texts:
+  status: 21 y.o. Golang developer
+  experience: |
+    "Axiom", 2.5 years of backend development
+      I'm responsible for the design and full technical support of one of the 
+    key projects (integration system with marketplaces (VK, Yandex, Ozon)) 
+    as well as several minor project including internal applications 
+    for employees, integrations with mailing and chat services, 
+    automation of task distribution in CRM, etc
+      Additionally, I sometimes develop new components 
+    and fix old ones on the frontend
+    PHP 7.4/8.2, MySQL, Git, JS (Vue3, JQuery)
+  about: |
+    I'm interested in software architecture and studying best practices. 
+    Although I can't call my knowledge in this area sufficient 
+    for really big projects, I would like to develop in this direction
+  education: |
+    2020-2025 Bachelor of Automation and Computer Engineering, 
+    Novosibirsk State Technical University, 3rd year student
+photo-path: img/avatar.jpg
+

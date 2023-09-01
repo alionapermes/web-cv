@@ -1,4 +1,4 @@
-SRC         = cmd/main.go
+SRC         = main.go
 ENV         = GOOS=js GOARCH=wasm
 BIN_TARGET  = webcv
 WASM_TARGET = ${BIN_TARGET}.wasm
